@@ -8,17 +8,12 @@ using namespace std;
 
 string getProcessName(DWORD processID) {
     char szProcessName[MAX_PATH] = "";
-
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, processID);
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, processID);
 
     if(hProcess) {
-        HMODULE hMod;
-        DWORD cbNeeded;
-
-        if(EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded)) {
-            GetModuleFileNameEx(hProcess, hMod, szProcessName, sizeof(szProcessName)/sizeof(szProcessName[0]));
-        } else {
-            cerr << "Skipping errant modules for process: " << processID << endl;
+        DWORD buffer_length = sizeof(szProcessName) / sizeof(szProcessName[0]);
+        if(!QueryFullProcessImageName(hProcess, 0, szProcessName, &buffer_length)) {
+            cerr << "Skipping errant process: " << processID << endl;
         }
     } else {
         // Access denied, this is expected for some number of processes
