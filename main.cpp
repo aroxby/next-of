@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include <windows.h>
 #include <psapi.h>
 using namespace std;
@@ -25,27 +26,39 @@ string getProcessName(DWORD processID) {
     return szProcessName;
 }
 
-int main(int argc, char *argv[]) {
-    static constexpr unsigned max_processes  = 1024;
+vector<DWORD> getAllProcessIds() {
+    // TODO: Would be nice to call EnumProcesses repeatedly and dynamically allocate the array
+    // but the process count can change between calls
+    static constexpr unsigned int max_processes  = 1024;
 
-    DWORD aProcesses[max_processes], cbNeeded, cProcesses;
+    vector<DWORD> output;
+
+    DWORD aProcesses[max_processes], cbNeeded;
     if(!EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded)) {
         cerr << "Error: Failed to count processes!\n";
+        return output;
+    }
+
+    unsigned int cProcesses = cbNeeded / sizeof(aProcesses[0]);
+    if(cProcesses == max_processes) {
+        cerr << "Error: too many processes running!\n";
+        return output;
+    }
+
+    output = {aProcesses, aProcesses + cProcesses};
+    return output;
+}
+
+int main(int argc, char *argv[]) {
+    auto processes = getAllProcessIds();
+    if(processes.empty()) {
         return 5;
     }
 
-    cProcesses = cbNeeded / sizeof(aProcesses[0]);
-    if(cProcesses == max_processes) {
-        cerr << "Error: too many processes running!\n";
-        return 10;
-    }
-
-    for(unsigned i = 0; i < cProcesses; i++) {
-        if(aProcesses[i] != 0) {
-            string pname = getProcessName(aProcesses[i]);
-            if(pname[0]) {
-                cout << pname << endl;
-            }
+    for(auto processId : processes) {
+        string pname = getProcessName(processId);
+        if(pname[0]) {
+            cout << pname << endl;
         }
     }
 
