@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -49,7 +50,16 @@ vector<DWORD> getAllProcessIds() {
     return output;
 }
 
+bool stringContains(const string &super, const string &sub) {
+    auto it = search(super.begin(), super.end(), sub.begin(), sub.end(), [](char a, char b) {
+        return tolower(a) == tolower(b);
+    });
+    return it != super.end();
+}
+
 int main(int argc, char *argv[]) {
+    vector<bool> running(argc - 1, false);
+
     auto processes = getAllProcessIds();
     if(processes.empty()) {
         return 5;
@@ -58,7 +68,24 @@ int main(int argc, char *argv[]) {
     for(auto processId : processes) {
         string pname = getProcessName(processId);
         if(pname[0]) {
-            cout << pname << endl;
+            for(int i = 1; i < argc; i++) {
+                if(stringContains(argv[i], pname)) {
+                    running[i] = true;
+                }
+            }
+        }
+    }
+
+    // Note: might be possible find the program file without a fully qualified path
+    // Use CommandLineToArgvW to get the program portion of a command line
+    // Use regular file commands to search relative paths for the program
+    // Use PathFindFileNameA to search %PATH% for the program
+    // Use GetModuleHandle to avoid enumerating all processes?
+    for(int i = 1; i < argc; i++) {
+        cout << running[i] << " : " << argv[i] << endl;
+        if(!running[i]) {
+            // Start argv[i]
+            break;
         }
     }
 
