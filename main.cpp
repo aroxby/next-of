@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
     // Use CommandLineToArgvW to get the program portion of a command line
     // Use regular file commands to search relative paths for the program
     // Use PathFindFileNameA to search %PATH% for the program
-    // Use GetModuleHandle to avoid enumerating all processes?
     for(int i = 1; i < argc; i++) {
         cout << running[i] << " : " << argv[i] << endl;
         if(!running[i]) {
