@@ -52,6 +52,25 @@ bool stringContains(const string &super, const string &sub) {
     return it != super.end();
 }
 
+bool start(char *cmdline) {
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    DWORD flags = CREATE_NEW_CONSOLE;   // Sharing a console doesn't share STDIN but does share STDOUT?
+
+    memset(&si, 0, sizeof(si));
+    si.cb = sizeof(si);
+
+    BOOL ret = CreateProcess(nullptr, cmdline, nullptr, nullptr, FALSE, flags, nullptr, nullptr, &si, &pi);
+    if(!ret) {
+        cerr << "Process creation error: " << GetLastError() << endl;
+        return false;
+    } else {
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+        return true;
+    }
+}
+
 int main(int argc, char *argv[]) {
     vector<bool> running(argc - 1, false);
 
@@ -78,7 +97,7 @@ int main(int argc, char *argv[]) {
     for(int i = 1; i < argc; i++) {
         cout << running[i] << " : " << argv[i] << endl;
         if(!running[i]) {
-            // Start argv[i]
+            start(argv[i]);
             break;
         }
     }

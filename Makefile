@@ -18,3 +18,7 @@ $(TARGET): $(OBJS)
 .PHONY: clean
 clean:
 	rm -rf $(TARGET) $(OBJS)
+
+.PHONY: test
+test: $(TARGET)
+	./$(TARGET) "C:\\Windows\\system32\\cmd.exe /k dir" "C:\\msys64\\mingw64\\bin\\python.exe -v"
