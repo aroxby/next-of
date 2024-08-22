@@ -1,23 +1,36 @@
-SRC_DIR = .
-SRCS = $(shell find $(SRC_DIR) -name *.cpp)
-OBJS = $(subst .cpp,.o,$(SRCS))
+SRCS = main.cpp
+OBJS = main.o
 
-TARGET = next-of
+TARGET = next-of.exe
 
-CPP=g++
-LD=g++
+ifneq ($(TOOLCHAIN), MSVC)
+	CPP = g++
+	LD = g++
+	RM = rm
+	CPPOUT = -c -o
+	LDOUT = -o
+	RM_FLAGS += -rf
+else
+	CPP = cl
+	LD = cl
+	RM = del
+	RM_FLAGS += /s /q
+	CPPFLAGS += /EHsc
+	CPPOUT = /c /Fo:
+	LDOUT = /link /out:
+endif
 
 all: $(TARGET)
 
 %.o : %.cpp
-	$(CPP) $(CPPFLAGS) $^ -c -o $@
+	$(CPP) $(CPPFLAGS) $^ $(CPPOUT)$@
 
 $(TARGET): $(OBJS)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(LD) $(LDFLAGS) $^ $(LDOUT)$@
 
 .PHONY: clean
 clean:
-	rm -rf $(TARGET) $(OBJS)
+	$(RM) $(RM_FLAGS) $(TARGET) $(OBJS)
 
 .PHONY: test
 test: $(TARGET)

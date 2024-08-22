@@ -11,13 +11,13 @@ RUN \
         --add Microsoft.VisualStudio.Component.Windows10SDK.20348 \
     && del /q vs_buildtools.exe
 
-
-# TODO: Install make https://gnu.mirror.constant.com/make/make-4.4.tar.gz
-
 # ENV is broken on Windows containers and can't read existing environment variables
 RUN setx /M PATH "%PATH%;C:\BuildTools\Common7\Tools;C:\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
 
 WORKDIR /src
+ADD https://gnu.mirror.constant.com/make/make-4.4.tar.gz .
+RUN tar -xzf make-4.4.tar.gz && del /q make-4.4.tar.gz
+RUN cd make-4.4 && VsDevCmd.bat && build_w32.bat && copy WinRel\gnumake.exe ..\make.exe
+
 ADD . .
-# TODO: Use Makefile
-CMD VsDevCmd.bat && cl /EHsc main.cpp /link /out:next-of.exe
+CMD VsDevCmd.bat && make TOOLCHAIN=MSVC
