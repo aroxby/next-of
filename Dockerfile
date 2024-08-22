@@ -1,5 +1,4 @@
-# TODO: Can we use nanocore here?
-FROM mcr.microsoft.com/windows:ltsc2019
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
 RUN \
     curl -sSL --output vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe && \
