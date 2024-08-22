@@ -14,10 +14,12 @@ RUN \
 # ENV is broken on Windows containers and can't read existing environment variables
 RUN setx /M PATH "%PATH%;C:\BuildTools\Common7\Tools;C:\BuildTools\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64"
 
-WORKDIR /src
+WORKDIR \\gnumake
 ADD https://gnu.mirror.constant.com/make/make-4.4.tar.gz .
 RUN tar -xzf make-4.4.tar.gz && del /q make-4.4.tar.gz
 RUN cd make-4.4 && VsDevCmd.bat && build_w32.bat && copy WinRel\gnumake.exe ..\make.exe
+RUN setx /M PATH "%PATH%;%CD%"
 
+WORKDIR \\src
 ADD . .
 CMD VsDevCmd.bat && make TOOLCHAIN=MSVC
